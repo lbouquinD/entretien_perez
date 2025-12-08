@@ -14,6 +14,7 @@ locals {
   # Définir la version de Terraform comme une variable locale Terraform
   TERRAFORM_VERSION = "1.7.5"
   TF_PACKAGE="terraform_${local.TERRAFORM_VERSION}_linux_amd64.zip"
+  SA_KEY_FILE="/root/sa-key.json"
   
   # Script bash pour télécharger et installer Terraform
   startup_script = <<-EOT
@@ -39,6 +40,14 @@ locals {
 
     # Nettoyage
     rm /tmp/${local.TF_PACKAGE}
+
+    git clone https://github.com/lbouquinD/entretien_perez.git /root/entretien
+    echo "${google_service_account_key.tf_runner_key.private_key}" | base64 -d > ${local.SA_KEY_FILE}
+    chmod 600 $SA_KEY_FILE
+    
+    # 4. CONFIGURATION D'AUTHENTIFICATION GARANTIE
+    export GOOGLE_APPLICATION_CREDENTIALS=${local.SA_KEY_FILE}
+    export GOOGLE_PROJECT=${var.project_id}
   EOT
 }
 

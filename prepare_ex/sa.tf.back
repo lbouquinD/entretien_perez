@@ -1,0 +1,21 @@
+# 1. Création du Compte de Service dédié
+resource "google_service_account" "tf_runner_sa" {
+  account_id   = "tf-runner-sa"
+  display_name = "Service Account for Terraform Runner VM"
+  project      = var.project_id
+}
+
+# 2. Attribution du rôle "Admin" (Éditeur)
+# Ce rôle donne un accès large sur le projet, comme demandé.
+resource "google_project_iam_member" "tf_runner_binding" {
+  project = var.project_id
+  role    = "roles/editor" # Rôle "Éditeur" pour l'accès large
+  member  = "serviceAccount:${google_service_account.tf_runner_sa.email}"
+}
+
+# 3. Création de la Clé JSON
+# C'est cette clé qui est injectée dans le startup-script
+resource "google_service_account_key" "tf_runner_key" {
+  service_account_id = google_service_account.tf_runner_sa.id
+  public_key_type    = "TYPE_X509_PEM_FILE"
+}
