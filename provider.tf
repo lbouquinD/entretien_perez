@@ -1,5 +1,5 @@
 provider "google" {
-  project = "playground-s-11-87bb59e8"
+  project = var.project_id
   region  = "europe-west1"
 }
 
